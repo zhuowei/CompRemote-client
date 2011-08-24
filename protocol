@@ -1,0 +1,8 @@
+id	use
+00	handshake: id + password string
+01	keyboard key down: id + keycode down as short
+02	keyboard key up: id + keycode up as short
+03	mouse button down: id + mouse button id as byte
+04	mouse button up: id + mouse button id as byte
+05 	move mouse by: id + mouse delta X as short +  mouseDeltaY as short
+06	move scroll wheel: id + amount as sbyte
