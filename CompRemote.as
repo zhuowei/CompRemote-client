@@ -110,6 +110,8 @@ public class CompRemote extends Sprite{
 	}
 	private function connected():void{
 		buildUI();
+		stage.addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler);
+		stage.addEventListener(KeyboardEvent.KEY_UP, keyUpHandler);
 	}
 	private function buildUI():void{
 		touchPad=new Sprite();
@@ -254,6 +256,39 @@ public class CompRemote extends Sprite{
 	}
 	private function releaseClick():void{
 		session.mouseUp(1);
+	}
+
+	private function keyDownHandler(e:KeyboardEvent):void{
+		//Keycodes used in Flash and keycodes used by Java are different.
+		//I'm not that good at converting the two. This is why some symbols do not show up.
+		if (hasShift(e.charCode)) session.keyPress(16); //Hack for capital letters
+		session.keyPress(getKeyCode(e.keyCode, e.charCode));
+	}
+
+	private function keyUpHandler(e:KeyboardEvent):void{
+		session.keyRelease(getKeyCode(e.keyCode, e.charCode));
+		if (hasShift(e.charCode)) session.keyRelease(16); //Hack for capital letters
+	}
+	private function hasShift(code:int):Boolean{
+		return String.fromCharCode(code).search(/[\?~!@#$%^&*():A-Z]/) != -1;
+	}
+	private function getKeyCode(code:int, charcode:int):int {
+		/*if ((code >= 65 && code <= 90) || (code >= 96 && code <= 122) || (code >= 48 && code <= 57)) {
+			return code;
+		}*/
+		if (code == 13) { //enter
+			return 10;
+		}
+		if (charcode == 58) { // double quote
+			return 152;
+		}
+		if (charcode == 63) {
+			return 47;
+		}
+		if(String.fromCharCode(charcode).search(/[-,.\/\\:_;=+\[\]<>{}]/) != -1) {
+			return charcode;
+		}
+		return code;
 	}
 }
 }

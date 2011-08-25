@@ -50,5 +50,17 @@ public class RemoteSession{
 		sock.writeByte(notches);
 		sock.flush();
 	}
+
+	public function keyPress(keycode:int):void{
+		sock.writeByte(1);
+		sock.writeShort(keycode);
+		sock.flush();
+	}
+
+	public function keyRelease(keycode:int):void{
+		sock.writeByte(2);
+		sock.writeShort(keycode);
+		sock.flush();
+	}
 }
 }
