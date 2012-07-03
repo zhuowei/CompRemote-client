@@ -14,7 +14,7 @@ public class CompRemote extends Sprite{
 	private static const TAP_TOLERENCE:Number = 3;
 	public var sock:Socket;
 	public var session:RemoteSession;
-	public var password:String;
+	public var passwordHash:String;
 	public var touchPad:Sprite;
 	public var leftButton:Sprite;
 	public var rightButton:Sprite;
@@ -29,6 +29,8 @@ public class CompRemote extends Sprite{
 	public var lastScrollY:Number;
 	private var curScrollAmount:Number;
 	public var scrollArea:Sprite;
+
+	public var serversScreen:ServersScreen;
 	
 	public function CompRemote(){
 		init();
@@ -38,18 +40,26 @@ public class CompRemote extends Sprite{
 			if(touchPad!=null){
 				resizeUI();
 			}
+			if (serversScreen != null) {
+				serversScreen.resizeUi();
+			}
 		});
 		stage.addEventListener("resize", function(e:Event):void{
 			if(touchPad!=null){
 				resizeUI();
 			}
+			if (serversScreen != null) {
+				serversScreen.resizeUi();
+			}
 		});
+		stage.align = StageAlign.TOP_LEFT;
 		stage.scaleMode=StageScaleMode.NO_SCALE;
-		popUpDialog();
+		//popUpDialog();
+		showServersScreen();
 	}
 	private function popUpDialog():void{
 		var login:LoginDialog=new LoginDialog();
-		login.title="CompRemote 2.1 Lite";
+		login.title="CompRemote 2.2 Lite";
 		login.message="Please enter the IP address and the password of the computer that you would like to control.";
 		//login.message="w" + stage.stageWidth + "h:"+ stage.stageHeight;
 		login.usernameLabel="IP address:";
@@ -59,10 +69,42 @@ public class CompRemote extends Sprite{
 		login.show(IowWindow.getAirWindow().group);
 		function loginDialogHandler(e:Event):void{
 			ipAddress=login.username;
-			password=login.password;
+			passwordHash=hashPassword(login.password);
 			connect();
 		}
 	}
+
+	private function showServersScreen():void {
+		serversScreen = new ServersScreen();
+		//serversScreen.width = stage.stageWidth;
+		//serversScreen.height = stage.stageHeight;
+		serversScreen.x = 0;
+		serversScreen.y = 0;
+		addChild(serversScreen);
+		serversScreen.addEventListener("serverSelect", serverSelectHandler);
+		serversScreen.addEventListener("quickConnectClick", quickConnectClickHandler);
+		serversScreen.resizeUi();
+	}
+
+	private function serverSelectHandler(e:Event):void {
+		hideServersScreen();
+		ipAddress = serversScreen.selectedIpAddress;
+		passwordHash = serversScreen.selectedPasswordHash;
+		connect();
+	}
+
+	private function hideServersScreen():void {
+		try {
+			removeChild(serversScreen);
+		} catch (e:Error) {
+		}
+	}
+
+	private function quickConnectClickHandler(e:Event):void {
+		hideServersScreen();
+		popUpDialog();
+	}
+
 	private function connect():void{
 		stage.align = StageAlign.TOP_LEFT;
 		stage.scaleMode = StageScaleMode.NO_SCALE;
@@ -84,7 +126,8 @@ public class CompRemote extends Sprite{
 	private function connectHandler(e:Event):void{
 		trace("connect");
 		session=new RemoteSession(sock);
-		session.auth(SHA1.encrypt(SHA1.encrypt(password)+"*&#~")); //This looks stupid and insecure because it is
+		//session.auth(SHA1.encrypt(SHA1.encrypt(password)+"*&#~")); //This looks stupid and insecure because it is
+		session.auth(passwordHash);
 		connected();
 	}
 	private function disconnectHandler(e:Event):void{
@@ -289,6 +332,10 @@ public class CompRemote extends Sprite{
 			return charcode;
 		}
 		return code;
+	}
+
+	public static function hashPassword(password:String):String {
+		return SHA1.encrypt(SHA1.encrypt(password)+"*&#~");
 	}
 }
 }

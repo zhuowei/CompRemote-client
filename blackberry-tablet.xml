@@ -8,6 +8,6 @@
   	<image>icon.png</image>
   </icon>
   <action>access_internet</action>
-  <buildId>10</buildId>
-  <platformVersion>1.0.0.0</platformVersion>
+  <buildId>29</buildId>
+  <platformVersion>2.0.0.0</platformVersion>
 </qnx>
